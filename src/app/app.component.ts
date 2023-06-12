@@ -1,32 +1,163 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { Chart, registerables } from 'chart.js';
+import 'chartjs-plugin-zoom';
+import zoomPlugin from 'chartjs-plugin-zoom';
+import { CoordinatesDialogComponentComponent } from './coordinates-dialog-component/coordinates-dialog-component.component';
+import { Graphic } from './models/Graphic';
+import { ApiService } from './services/api.service';
+
 
 @Component({
   selector: 'app-root',
-  template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-    </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    <router-outlet></router-outlet>
-  `,
-  styles: []
+  templateUrl: 'app.component.html',
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  title = 'gestao-casa';
+export class AppComponent implements OnInit {
+  @ViewChild("canvas", { static: true }) elemento: ElementRef;
+  response: Graphic;
+    // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1],[4.0, 6.5],[5.0, 7.1],[6.0, 8.5]];
+  // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1],[4.0, 6.5],[5.0, 7.1]];
+  // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1]];
+  
+  startCoordinates = [{x:1.0, y:2.0,},{x:2.0, y:3.5},{x:3.0, y:5.1},{x:4.0, y:6.5}];
+  chart: any = [];
+  typeChart: number = 1;
+  coordinates: any[] = [];
+  dataSource: MatTableDataSource<any>;
+  functionLaw: string = "";
+
+  constructor(private apiService: ApiService, private dialog: MatDialog) {
+    Chart.register(...registerables, zoomPlugin)
+  }
+
+  ngOnInit() {
+    // this.dataSource = new MatTableDataSource(this.startCoordinates);
+    // for (const coordinate of this.startCoordinates) {
+    //   this.coordinates.push([coordinate.x, coordinate.y]);
+    // }
+  }
+
+  openFormDialog() {
+    this.dialog.open(CoordinatesDialogComponentComponent).afterClosed().subscribe(result => {
+      if (result) {
+        this.coordinates.push(result);
+        this.dataSource = new MatTableDataSource(this.coordinates);
+      }
+    });
+  }
+
+  editRecord(element: MatTableDataSource<any>) {
+    console.log("element: ", element);
+    this.dialog.open(CoordinatesDialogComponentComponent, { data: element} ).afterClosed().subscribe(result => {
+      const index = this.coordinates.indexOf(element);
+      if (result) {
+        this.coordinates.splice(index, 1, result);
+        this.dataSource = new MatTableDataSource(this.coordinates);
+      }
+    });
+  }
+  
+  deleteelement(element: MatTableDataSource<any>) {
+    const index = this.coordinates.indexOf(element);
+  if (index > -1) {
+    this.coordinates.splice(index, 1);
+    this.dataSource = new MatTableDataSource(this.coordinates);
+  }
+  }
+
+
+  
+  sendCoordinates(): void {
+    let newCoordinates = [];
+    console.log("this.coordinates: ", this.coordinates)
+    for (const coordinate of this.coordinates) {
+      newCoordinates.push([coordinate.x, coordinate.y]);
+    }
+    this.apiService.postCoordinates(newCoordinates)
+      .subscribe(response => {
+        this.response = response;
+        this.setChart(this.response);
+        this.functionLaw = this.response.functionLaw;
+      });
+    this.chart.destroy();
+  }
+
+  setChart(gaphic: Graphic) {
+
+    const xValues = [];
+    const yValues = [];
+    const pointsVisibilityX = [];
+    const pointsVisibilityY = [];
+
+
+    for (const element of gaphic.coordinates) {
+      xValues.push(element.x);
+      yValues.push(element.y);
+      if (element.visible) {
+        pointsVisibilityX.push(element.x);
+        pointsVisibilityY.push(element.y);
+      }
+    }
+
+    const data = {
+      labels: xValues,
+      datasets: [
+        {
+          label: 'Y',
+          data: yValues,
+          fill: false,
+          // borderColor: 'red',
+          tension: 0.4,
+          backgroundColor: 'rgba(0, 0, 255, 100)',
+          borderColor: 'rgba(39, 140, 245, 0.8)',
+          borderWidth: 2,
+          pointRadius: (context) => {
+            if (pointsVisibilityY.includes(context.parsed.y)) {
+              if(pointsVisibilityX.includes(context.parsed.x))
+              return 5;
+            }
+            return 0;
+          },
+          // pointColor: 'red',
+          pointBackgroundColor: 'rgba(245, 40, 145, 0.8)'
+        },
+        
+      ]
+    };
+
+    this.chart = new Chart(this.elemento.nativeElement, {
+      type: 'line',
+      data: data,
+      options: {
+        scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+        },
+        y: {
+          type: 'linear',
+          position: 'left'
+        }
+      },
+        aspectRatio: 3,
+        plugins: {
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'xy',
+            }
+          }
+        }
+      }
+    });
+
+  }
+
 }

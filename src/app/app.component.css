@@ -1,0 +1,130 @@
+.container {
+    background-color: #fff;
+    margin: auto;
+    padding: 1rem 1rem;
+    border-radius: 5px;
+  }
+
+.card {
+    width: 50%;
+    height: 20rem;
+    margin: 1rem auto;
+    background-color: rgb(235, 235, 235);
+}
+img {
+    height: 10rem;
+    width: 50%;
+}
+
+.chart-container {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .container {
+    background-color: #fff;
+    margin: auto;
+    padding: 1rem 1rem;
+    border-radius: 5px;
+  }
+  
+  button:nth-child(1) {
+    margin-right: auto;
+  }
+  
+  .mat-form-field {
+    font-size: 14px;
+    width: 100%;
+  }
+  
+  td,
+  th {
+    width: 5%;
+  }
+
+  .coordinates_column {
+    width: 500px;
+  }
+
+  .chart_column {
+    width: 85%;
+  }
+
+  .title {
+    text-align: start;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    margin-left: 1rem;
+  }
+  
+  .table-container {
+    width: 90%;
+    margin: 1rem;
+    position: relative;
+    min-height: 200px;
+    max-height: 200vh;
+    overflow: auto;
+  }
+  
+  .add_cordinate {
+    margin-top: 1rem;
+    margin-right: 1rem;
+    text-align: right;
+  }
+
+  .send_process {
+    width: 100%;
+    margin-top: 2rem;
+  }
+  
+  .mat-column-id {
+    word-wrap: break-word !important;
+    white-space: unset !important;
+    text-align: left;
+    flex: 0 0 3% !important;
+    width: 2% !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  
+    word-break: break-word;
+  
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+  
+  .mat-column-acoes {
+    word-wrap: break-word !important;
+    white-space: unset !important;
+    text-align: right;
+    flex: 0 0 3% !important;
+    width: 1% !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  
+    word-break: break-word;
+  
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
+  .mat-elevation-z8 {
+    border-radius: 5px;
+  }
+
+  .function_law {
+    margin-top: 1rem;
+    margin-left: 2.5rem;
+    margin-bottom: 3px;
+    width: 95%;
+    height: 1rem;
+    align-items: center;
+    padding: 4px 8px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+  }
+  
