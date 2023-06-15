@@ -52,7 +52,7 @@ img {
   }
 
   .title {
-    text-align: start;
+    text-align: center;
     margin-top: 2rem;
     padding-top: 1rem;
     margin-left: 1rem;
@@ -114,6 +114,7 @@ img {
 
   .mat-elevation-z8 {
     border-radius: 5px;
+    margin: 2rem;
   }
 
   .function_law {

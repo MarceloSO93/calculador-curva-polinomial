@@ -1,7 +1,7 @@
 <div class="container">
   
     <div class="mat-elevation-z8">
-        <h1 class="title">Function curve</h1>
+        <h1 class="title">Curva da função polinomial</h1>
 
       <table>
 
@@ -54,7 +54,14 @@
               </div>
 
               </div>
-            
+
+              <mat-slide-toggle [(ngModel)]="polinomial" (ngModelChange)="definePolinomial()">
+                Polinomial
+              </mat-slide-toggle>
+              <br>
+              <mat-slide-toggle [(ngModel)]="exponential" (ngModelChange)="definEexponential()">
+                Exponential
+              </mat-slide-toggle>
             </td>
 
           <td class="chart_column">

@@ -11,7 +11,11 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  postCoordinates(coordinates:any[]): Observable<Graphic> {
-    return this.http.post<Graphic>(this.apiUrl, coordinates );
+  calculatePolinomialCurve(coordinates:any[]): Observable<Graphic> {
+    return this.http.post<Graphic>(this.apiUrl+"/curve-type/POLINOMIAL", coordinates );
+  }
+
+  calculateExponentialCurve(coordinates:any[]): Observable<Graphic> {
+    return this.http.post<Graphic>(this.apiUrl+"/curve-type/EXPONENTIAL", coordinates );
   }
 }

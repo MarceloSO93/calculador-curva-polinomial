@@ -7,6 +7,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { CoordinatesDialogComponentComponent } from './coordinates-dialog-component/coordinates-dialog-component.component';
 import { Graphic } from './models/Graphic';
 import { ApiService } from './services/api.service';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 
 @Component({
@@ -17,16 +18,19 @@ import { ApiService } from './services/api.service';
 export class AppComponent implements OnInit {
   @ViewChild("canvas", { static: true }) elemento: ElementRef;
   response: Graphic;
-    // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1],[4.0, 6.5],[5.0, 7.1],[6.0, 8.5]];
+  // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1],[4.0, 6.5],[5.0, 7.1],[6.0, 8.5]];
   // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1],[4.0, 6.5],[5.0, 7.1]];
   // newCoordinates = [[1.0, 2.0],[2.0, 3.5],[3.0, 5.1]];
-  
-  startCoordinates = [{x:1.0, y:2.0,},{x:2.0, y:3.5},{x:3.0, y:5.1},{x:4.0, y:6.5}];
+
+  startCoordinates = [{ x: 1.0, y: 2.0, }, { x: 2.0, y: 3.5 }, { x: 3.0, y: 5.1 }, { x: 4.0, y: 6.5 }];
   chart: any = [];
   typeChart: number = 1;
   coordinates: any[] = [];
   dataSource: MatTableDataSource<any>;
   functionLaw: string = "";
+
+  polinomial: boolean = true;
+  exponential: boolean = false;
 
   constructor(private apiService: ApiService, private dialog: MatDialog) {
     Chart.register(...registerables, zoomPlugin)
@@ -39,6 +43,19 @@ export class AppComponent implements OnInit {
     // }
   }
 
+  definePolinomial(): void {
+    if (this.polinomial) {
+      this.polinomial = true;
+      this.exponential = false;
+    }
+  }
+
+  definEexponential(): void {
+    if (this.exponential) {
+      this.polinomial = false;
+      this.exponential = true;
+    }
+  }
   openFormDialog() {
     this.dialog.open(CoordinatesDialogComponentComponent).afterClosed().subscribe(result => {
       if (result) {
@@ -50,7 +67,7 @@ export class AppComponent implements OnInit {
 
   editRecord(element: MatTableDataSource<any>) {
     console.log("element: ", element);
-    this.dialog.open(CoordinatesDialogComponentComponent, { data: element} ).afterClosed().subscribe(result => {
+    this.dialog.open(CoordinatesDialogComponentComponent, { data: element }).afterClosed().subscribe(result => {
       const index = this.coordinates.indexOf(element);
       if (result) {
         this.coordinates.splice(index, 1, result);
@@ -58,30 +75,44 @@ export class AppComponent implements OnInit {
       }
     });
   }
-  
+
   deleteelement(element: MatTableDataSource<any>) {
     const index = this.coordinates.indexOf(element);
-  if (index > -1) {
-    this.coordinates.splice(index, 1);
-    this.dataSource = new MatTableDataSource(this.coordinates);
-  }
+    if (index > -1) {
+      this.coordinates.splice(index, 1);
+      this.dataSource = new MatTableDataSource(this.coordinates);
+    }
   }
 
 
-  
+
   sendCoordinates(): void {
     let newCoordinates = [];
     console.log("this.coordinates: ", this.coordinates)
     for (const coordinate of this.coordinates) {
       newCoordinates.push([coordinate.x, coordinate.y]);
     }
-    this.apiService.postCoordinates(newCoordinates)
-      .subscribe(response => {
-        this.response = response;
-        this.setChart(this.response);
-        this.functionLaw = this.response.functionLaw;
-      });
-    this.chart.destroy();
+
+    if (this.polinomial === true && this.exponential === false) {
+
+      this.apiService.calculatePolinomialCurve(newCoordinates)
+        .subscribe(response => {
+          this.response = response;
+          this.setChart(this.response);
+          this.functionLaw = this.response.functionLaw;
+        });
+      this.chart.destroy();
+    } else if (this.polinomial === false && this.exponential === true) {
+      this.apiService.calculateExponentialCurve(newCoordinates)
+        .subscribe(response => {
+          this.response = response;
+          this.setChart(this.response);
+          this.functionLaw = this.response.functionLaw;
+        });
+      this.chart.destroy();
+    }
+
+
   }
 
   setChart(gaphic: Graphic) {
@@ -115,15 +146,15 @@ export class AppComponent implements OnInit {
           borderWidth: 2,
           pointRadius: (context) => {
             if (pointsVisibilityY.includes(context.parsed.y)) {
-              if(pointsVisibilityX.includes(context.parsed.x))
-              return 5;
+              if (pointsVisibilityX.includes(context.parsed.x))
+                return 5;
             }
             return 0;
           },
           // pointColor: 'red',
           pointBackgroundColor: 'rgba(245, 40, 145, 0.8)'
         },
-        
+
       ]
     };
 
@@ -132,15 +163,18 @@ export class AppComponent implements OnInit {
       data: data,
       options: {
         scales: {
-        x: {
-          type: 'linear',
-          position: 'bottom',
+          x: {
+            type: 'linear',
+            position: 'bottom'
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            ticks: {
+              stepSize: 5
+            }
+          }
         },
-        y: {
-          type: 'linear',
-          position: 'left'
-        }
-      },
         aspectRatio: 3,
         plugins: {
           zoom: {

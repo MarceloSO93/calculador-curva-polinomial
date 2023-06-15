@@ -28,6 +28,7 @@ import { NgxMaskModule } from 'ngx-mask';
 import { ToastrModule } from 'ngx-toastr';
 import { AppComponent } from './app.component';
 import { CoordinatesDialogComponentComponent } from './coordinates-dialog-component/coordinates-dialog-component.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 // Componentes do projeto
 
 
@@ -68,6 +69,7 @@ import { CoordinatesDialogComponentComponent } from './coordinates-dialog-compon
     MatProgressSpinnerModule,
     MatMenuModule,
     MatAutocompleteModule,
+    MatSlideToggleModule,
     ToastrModule.forRoot(
       {
         timeOut: 4000,
